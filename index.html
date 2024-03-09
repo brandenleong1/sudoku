@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Sudoku</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body onload="init()">
+    <script src="utils.js"></script>
+    <script src="script.js"></script>
+    <script src="solver.js"></script>
+	<div style="position: absolute; display: flex; left: 640px; top: 50px;">
+
+		<div class="panel" style="">
+			<table class="panelButtonTable unselectable"">
+				<tr>
+					<td class="panelButtonTd" onclick="detectKeypadPress('1');">1</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('2');">2</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('3');">3</td>
+				</tr>
+				<tr>
+					<td class="panelButtonTd" onclick="detectKeypadPress('4');">4</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('5');">5</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('6');">6</td>
+				</tr>
+				<tr>
+					<td class="panelButtonTd" onclick="detectKeypadPress('7');">7</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('8');">8</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('9');">9</td>
+				</tr>
+			</table>
+
+			<table class="panelButtonTable unselectable"">
+				<tr>
+					<td class="panelButtonTd" id="largeMode" onclick="detectKeypadPress('largeMode')" style="background-color: rgba(255, 255, 255, 0.5);">❏</td>
+					<td class="panelButtonTd" onclick="detectKeypadPress('delete')">⌫</td>
+					<td class="panelButtonTd" id="smallMode" onclick="detectKeypadPress('smallMode')">⊞</td>
+				</tr>
+			</table>
+			
+			<div style="width: 182px; height: 218px; border: 1px solid black; margin-bottom: 10px; background-color: rgb(75, 192, 71);">
+				<div class="panelButtonTd unselectable" style="width: 100%; border: 0px solid black; border-bottom: 1px solid black; height: 30px; margin-bottom: 10px; text-align: center; font-size: 20px;" onclick="addColour();">New colour ✎</div>
+				<div id="colourPanel" style="height: 176px; overflow-y: auto;"></div>
+			</div>
+
+			<table class="panelButtonTable unselectable">
+				<tr>
+					<td class="panelButtonTd" id="drawLine" onclick="drawLineToggle();">⟍</td>
+					<td class="panelButtonTd" id="deleteSingleLine" onclick="deleteLineToggle();">🗑</td>
+					<td class="panelButtonTd" onclick="deleteAllLines();">AC</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="panel" style="left: 844px;">
+			<div class="panelLongButton" onclick="lockGrid();">Lock Grid</div>
+			<div class="panelLongButton" onclick="unlockGrid();">Unlock Grid</div>
+			<div class="panelLongButton" onclick="clearUnlocked();">Clear Unlocked</div>
+			<div class="panelLongButton" style="margin-top: 40px;" onclick="exportGrid();">Export Grid</div>
+			<div class="panelLongButton" onclick="checkImport()">Import Grid</div>
+			<div class="panelLongButton" style="margin-top: 40px;" onclick="checkSolvedGrid();">Check Solved</div>
+			<div class="panelLongButton" onclick="toggleSpecial();">Toggle Extra Panel</div>
+			<div class="panelLongButton" onclick="generateSudoku();">Generate Sudoku</div>
+		</div>
+
+		<div id="specialPanel" class="panel" style="left: 1048px; display: none;">
+			<div class="panelLongButton" onclick="fillUnlockedAll();">Fill Pencil All</div>
+			<div class="panelLongButton" onclick="fillUnlockedAccurate();">Fill Pencil Accurate</div>
+<!-- 			<div class="panelLongButton" style="margin-top: 40px;" onclick="solverTakeStep();">Solver Take Step</div> -->
+		</div>
+
+		<div id="specialPanel2" class="panel" style="left: 1252px; background-color: black; display: none;">
+			<div id="sp0" class="solverPanelText">
+				<div class="solverPanelTextLabel">0. Reduce possibilities</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp1" class="solverPanelText">
+				<div class="solverPanelTextLabel">1. Hidden Singles</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp2" class="solverPanelText">
+				<div class="solverPanelTextLabel">2. Naked Pairs/Trips</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp3" class="solverPanelText">
+				<div class="solverPanelTextLabel">3. Hidden Pairs/Trips</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp4" class="solverPanelText">
+				<div class="solverPanelTextLabel">4. Naked/Hidden Quads</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp5" class="solverPanelText">
+				<div class="solverPanelTextLabel">5. Pointing Pairs</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp6" class="solverPanelText">
+				<div class="solverPanelTextLabel">6. Box/Line Reduction</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp7" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: yellow;">7. X-Wing</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp8" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: yellow;">8. Simple Colouring</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp9" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: yellow;">9. Y-Wing</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp10" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: yellow;">10. Swordfish</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp11" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: yellow;">11. XYZ-Wing</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp12" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">12. X-Cycles</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp13" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">13. BUG</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp14" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">14. XY-Chain</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp15" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">15. 3D Medusa</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp16" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">16. Jellyfish</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp17" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">17. Unique Rectangles</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp18" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">18. SK Loops</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp19" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">19. Extended Uniq. Rect.</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp20" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">20. Hidden Uniq. Rect.</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp21" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">21. WXYZ-Wing</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp22" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: orange;">22. Aligned Pair Exclusion</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp23" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">23. Exocet</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp24" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">24. Grouped X-Cycles</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp25" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">25. Empty Rectangles</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp26" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">26. Finned X-Wing</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp27" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">27. Finned Swordfish</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp28" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">28. Altern. Inference Chains</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp29" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">29. Sue-de-Cog</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp30" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">30. Digit Forcing Chains</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp31" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">31. Nishio Forcing Chains</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp32" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">32. Cell Forcing Chains</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp33" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">33. Unit Forcing Chains</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp34" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">34. Almost Locked Sets</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp35" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">35. Death Blossom</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp36" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">36. Pattern Overlay</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp37" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: red;">37. Quad Forcing Chains</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+			<div id="sp38" class="solverPanelText">
+				<div class="solverPanelTextLabel" style="color: purple;">38. Trial and Error</div>
+				<div class="solverPanelTextYesNo"></div>
+			</div>
+
+		</div>
+
+		<div id="fillerPanel" class="panel" style="left: 1456px; background-color: white;">
+		</div>
+
+	</div>
+  </body>
+</html>
