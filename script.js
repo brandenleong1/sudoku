@@ -772,7 +772,9 @@ function exportGrid() {
 	let wantsUnlocked = confirm('Would you like to export unlocked cells?');
 	let wantsSuperLocked = confirm('Would you like to super-lock locked cells?');
 	let wantsURL = confirm('Would you like to export to URL?');
-	prompt(wantsURL ? 'URL:' : 'Import string:', exportGridHidden(wantsUnlocked, wantsSuperLocked, wantsURL));
+	let exportStr = exportGridHidden(wantsUnlocked, wantsSuperLocked, wantsURL);
+	if (!exportStr) return;
+	prompt(wantsURL ? 'URL:' : 'Import string:', exportStr);
 }
 
 function checkImport() {
@@ -792,24 +794,21 @@ function checkImport() {
 
 function exportGridHidden(wantsUnlocked = true, wantsSuperLocked = false, wantsURL = false) {
 	let exportString = wantsURL ? 'https://brandenleong1.github.io/sudoku/?import=' : '';
+	let first = true;
 	for (let i = 0; i < 9; i++) {
 		for (let j = 0; j < 9; j++) {
 			let c = document.getElementById('' + i + j);
 			if (c.nums.length != 0) {
 				c.nums.sort((a, b) => a - b);
 				if (wantsUnlocked) {
-					if (exportString != '') {
-						exportString += '/';
-					}
+					if (!first) exportString += '/';
 					exportString += '' + i + j;
 					for (let n = 0; n < c.nums.length; n++) {
 						exportString += c.nums[n];
 					}
 				} else {
 					if (c.classList.contains('locked')) {
-						if (exportString != '') {
-							exportString += '/';
-						}
+						if (!first) exportString += '/';
 						exportString += '' + i + j + c.nums[0];
 					}
 				}
@@ -823,8 +822,13 @@ function exportGridHidden(wantsUnlocked = true, wantsSuperLocked = false, wantsU
 						exportString += 'L';
 					}
 				}
+				first = false;
 			}
 		}
+	}
+	if (first) {
+		alert('Nothing to export!');
+		return false;
 	}
 	return exportString;
 }
