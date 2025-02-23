@@ -30,11 +30,11 @@ function createBoard() {
 			cell.nums = [];
 			cell.colour = 'c-1';
 			cell.addEventListener('click', function() {highlightCell(event.target);});
-			row.appendChild(cell);
+			row.append(cell);
 		}
-		table.appendChild(row);
+		table.append(row);
 	}
-	document.body.appendChild(table);
+	document.body.append(table);
 }
 
 function highlightCell(cell, moveByKeyboard=false) {
@@ -437,11 +437,11 @@ function createPencilTable(c) {
 			cell.id = c.id + "" + (i * 3 + j + 1);
 			cell.colour = 'c-1';
 			cell.classList.add('smallTd');
-			row.appendChild(cell);
+			row.append(cell);
 		}
-		table.appendChild(row);
+		table.append(row);
 	}
-	c.appendChild(table);
+	c.append(table);
 }
 
 function addColour() {
@@ -500,11 +500,8 @@ function addColour() {
 	};
 
 
-	document.getElementById('colourPanel').appendChild(div);
-	div.appendChild(use);
-	div.appendChild(text);
-	div.appendChild(color);
-	div.appendChild(deleteButton);
+	document.getElementById('colourPanel').append(div);
+	div.append(use, text, color, deleteButton);
 	colourID += 1;
 }
 
@@ -637,7 +634,7 @@ function drawLine() {
 
 		if (document.getElementById('svg')) {
 			let svg = document.getElementById('svg');
-			svg.appendChild(line);
+			svg.append(line);
 		} else {
 			let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 			svg.id = 'svg';
@@ -650,8 +647,8 @@ function drawLine() {
 			svg.style.pointerEvents = 'none';
 			svg.classList.add('svgLine');
 
-			svg.appendChild(line);
-			document.body.appendChild(svg);
+			svg.append(line);
+			document.body.append(svg);
 		}
 
 		createLineMode = 0;
